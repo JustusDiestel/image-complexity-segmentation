@@ -20,7 +20,6 @@ class KMeansSegmenter(ComplexitySegmenter):
         return "kmeans"
 
     def segment(self, features: np.ndarray) -> np.ndarray:
-
         height, width, n_features = features.shape
 
         flat_features = features.reshape(
@@ -34,11 +33,34 @@ class KMeansSegmenter(ComplexitySegmenter):
         kmeans = KMeans(
             n_clusters=self.n_clusters,
             random_state=self.random_state,
-            n_init="auto",
+            n_init=10,
         )
 
         labels = kmeans.fit_predict(scaled_features)
 
-        mask = labels.reshape(height, width)
+        ordered_labels = self._order_clusters(
+            labels=labels,
+            cluster_centers=kmeans.cluster_centers_,
+        )
 
-        return mask
+        return ordered_labels.reshape(height, width)
+
+    def _order_clusters(
+        self,
+        labels: np.ndarray,
+        cluster_centers: np.ndarray,
+    ) -> np.ndarray:
+
+        complexity_scores = cluster_centers.mean(axis=1)
+
+        order = np.argsort(complexity_scores)
+
+        mapping = {
+            old_label: new_label
+            for new_label, old_label in enumerate(order)
+        }
+
+        return np.array(
+            [mapping[label] for label in labels],
+            dtype=np.uint8,
+        )
