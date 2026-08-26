@@ -10,7 +10,7 @@ from complexity_seg.visualization import show_result
 from complexity_seg.dataset_export import export_sample
 
 image = plt.imread("examples/test_images/fest.png")
-global_window_size = 30
+global_window_size = 31
 
 if image.ndim == 3:
     image = image.mean(axis=2)
@@ -21,16 +21,6 @@ pipeline = ComplexityPipeline(
             global_window_size,
             bins=16,
         ),
-        Delentropy(
-            global_window_size,
-            bins=16,
-        ),
-        MeanFrequency(
-            global_window_size,
-        ),
-        MedianFrequency(
-            global_window_size,
-        )
     ],
     segmenter=KMeansSegmenter(
         n_clusters=3,
